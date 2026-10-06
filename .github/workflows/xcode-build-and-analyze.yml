@@ -18,6 +18,7 @@ jobs:
         run: xcodebuild -version
       - name: Build and analyze iOS app
         run: |
+          set -o pipefail
           xcodebuild \
             -project QuietReels.xcodeproj \
             -scheme QuietReels \
@@ -25,4 +26,10 @@ jobs:
             -destination 'generic/platform=iOS Simulator' \
             -derivedDataPath "$RUNNER_TEMP/QuietReelsDerivedData" \
             CODE_SIGNING_ALLOWED=NO \
-            build analyze
+            build analyze 2>&1 | tee "$RUNNER_TEMP/xcodebuild.log"
+      - name: Report build errors
+        if: failure()
+        run: |
+          grep -E 'error:|BUILD FAILED|ANALYZE FAILED' "$RUNNER_TEMP/xcodebuild.log" | head -30 | while IFS= read -r line; do
+            echo "::error::$line"
+          done || true

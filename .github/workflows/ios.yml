@@ -25,6 +25,7 @@ jobs:
           echo "id=$SIMULATOR_ID" >> "$GITHUB_OUTPUT"
       - name: Build and run XCTest on iPhone simulator
         run: |
+          set -o pipefail
           xcodebuild \
             -project QuietReels.xcodeproj \
             -scheme QuietReels \
@@ -34,7 +35,13 @@ jobs:
             -resultBundlePath "$RUNNER_TEMP/QuietReelsTests.xcresult" \
             -parallel-testing-enabled NO \
             CODE_SIGNING_ALLOWED=NO \
-            test
+            test 2>&1 | tee "$RUNNER_TEMP/ios-test.log"
+      - name: Report test and build errors
+        if: failure()
+        run: |
+          grep -E 'error:|TEST FAILED|BUILD FAILED' "$RUNNER_TEMP/ios-test.log" | head -30 | while IFS= read -r line; do
+            echo "::error::$line"
+          done || true
       - name: Upload XCTest results
         if: always()
         uses: actions/upload-artifact@v4
