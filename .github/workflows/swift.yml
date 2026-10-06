@@ -1,0 +1,20 @@
+name: Swift
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-check:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse all Swift sources
+        run: xcrun swiftc -frontend -parse QuietReels/*.swift QuietReelsTests/*.swift
+      - name: Type-check the standalone library model
+        run: xcrun swiftc -typecheck QuietReels/LibraryStore.swift

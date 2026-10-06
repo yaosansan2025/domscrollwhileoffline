@@ -33,6 +33,16 @@ Downloaded MP4 files, thumbnails when extraction succeeds, and an atomic JSON in
 
 The recommended Web discovery and download flow could not be exercised in this Linux workspace. On a device, sign in through the Web Session, request a small batch, confirm the actual count and error messages, force quit and reopen, enable Airplane Mode, and verify local playback and previous/next navigation. Also test Pause/Resume/Cancel, Refresh, and Clear All. A successful Xcode build alone will not prove the Instagram Web prototype works, because Instagram can change the rendered page and media access at any time.
 
+## GitHub Actions
+
+Three workflows run on pushes to `main`, pull requests, or manually from the Actions tab:
+
+- **Swift** parses all app and test Swift files and type-checks `LibraryStore.swift`. This repository is an Xcode app without a `Package.swift`, so the standard Swift Package template would fail here.
+- **Xcode - Build and Analyze** builds and analyzes the iOS app for a generic iPhone simulator without code signing.
+- **iOS** selects an available iPhone simulator and runs the `QuietReelsTests` XCTest target through `xcodebuild test`. The tests verify that the manual Shared Reels entry points accept only a chosen Reel URL and an HTTPS direct video file URL, rejecting discovery pages and unrelated hosts.
+
+All three use GitHub-hosted macOS runners. The workflows do not require Apple signing credentials. They cannot verify the Instagram Web session, recommendation ranking, or offline playback on a real iPhone.
+
 ## Build and export on a Mac
 
 Requirements: Xcode 15 or newer with the iOS 17 SDK. No third-party packages are needed. Open `QuietReels.xcodeproj`, choose an iPhone simulator or device, and run the `QuietReels` scheme. The default bundle identifier is `org.example.QuietReels`; use your own unique identifier for device installation. To check the build without signing:
