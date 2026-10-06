@@ -81,7 +81,7 @@ private struct AddSharedClipView: View {
                         .autocorrectionDisabled()
                         .keyboardType(.URL)
                 }
-                Section("Video source") {
+                Section {
                     Picker("Source", selection: $sourceIsURL) {
                         Text("Saved file").tag(false)
                         Text("Direct URL").tag(true)
@@ -93,6 +93,8 @@ private struct AddSharedClipView: View {
                             .autocorrectionDisabled()
                             .keyboardType(.URL)
                     }
+                } header: {
+                    Text("Video source")
                 } footer: {
                     Text("A Reel page URL is not a video URL. Direct video URLs are an optional prototype source and may expire or require authorization.")
                 }
