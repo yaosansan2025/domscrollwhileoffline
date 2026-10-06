@@ -45,6 +45,14 @@ All three use GitHub-hosted macOS runners. The workflows do not require Apple si
 
 ## Build and export on a Mac
 
+To open the app in iPhone Simulator automatically, run this from the repository directory on your Mac:
+
+```sh
+bash scripts/run-ios-simulator.sh
+```
+
+The script chooses an available iPhone with iOS 17 or newer, opens Simulator, builds the app without signing, installs it, and launches it. Xcode and an iOS simulator runtime must be installed. You can optionally pass a specific simulator UDID as the first argument. The cloud workspace and GitHub Actions runners cannot display an interactive simulator on your Mac.
+
 Requirements: Xcode 15 or newer with the iOS 17 SDK. No third-party packages are needed. Open `QuietReels.xcodeproj`, choose an iPhone simulator or device, and run the `QuietReels` scheme. The default bundle identifier is `org.example.QuietReels`; use your own unique identifier for device installation. To check the build without signing:
 
 ```sh
