@@ -2,6 +2,20 @@
 
 A SwiftUI iPhone prototype with five tabs: **Shared Reels**, **Recommended** (experimental personalized batch cache), **Offline Videos**, **My Profile**, and **Settings**. Offline playback uses only saved local files. It never fetches another recommendation while you watch a cached batch.
 
+## Project boundary and feasibility check
+
+The official Instagram iOS and Android apps are proprietary, closed-source software. This repository is an independent prototype; it is not a fork or modified build of Instagram, and it cannot preserve Instagram's native app UI while removing selected features.
+
+Before implementing a future request that changes an existing product, verify these points first and document the result before writing application code:
+
+1. Confirm whether the target application is open source and whether its license permits modification and redistribution.
+2. Confirm that the actual source repository belongs to the target application; a public SDK or API does not make the application itself open source.
+3. Check the supported APIs, authentication model, data access, media-download permissions, and storage restrictions against the requested behavior.
+4. State clearly whether the proposed result is a source modification, an independent client, a Web wrapper, a companion/accessibility tool, or a technical prototype.
+5. If the requested experience is impossible through the source or supported APIs, explain that boundary and agree on the closest alternative before implementation.
+
+For this project, those checks mean that an Instagram-looking replacement must not be represented as a modified Instagram app. Access to personal DMs, Instagram's personalized recommendation feed, and long-term downloadable Reel media is not available through the supported integrations described below.
+
 ## Cache mode
 
 In **Settings**, the **Recommended Reels Auto Cache** switch controls which source can start new caching. It is **OFF** by default: open an item in Shared Reels to use **Cache Offline**. Turn it **ON** to use **Download Offline Reels** or **Refresh Offline Videos** in Recommended. The switch is saved across launches. It does not delete files, change either downloader's storage format, or restrict playback. **Offline Videos** shows both caches with **Shared** and **Recommended** labels and their combined size. Its **Manage** menu can clear either source independently or clear both, each with confirmation. The Recommended page also retains its own cache list and controls.
