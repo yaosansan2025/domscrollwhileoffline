@@ -1,0 +1,135 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		000000000000000000000012 = {isa = PBXBuildFile; fileRef = 000000000000000000000007; };
+		000000000000000000000013 = {isa = PBXBuildFile; fileRef = 000000000000000000000008; };
+		000000000000000000000014 = {isa = PBXBuildFile; fileRef = 000000000000000000000009; };
+		000000000000000000000015 = {isa = PBXBuildFile; fileRef = 00000000000000000000000A; };
+		000000000000000000000016 = {isa = PBXBuildFile; fileRef = 00000000000000000000000B; };
+		000000000000000000000022 = {isa = PBXBuildFile; fileRef = 000000000000000000000020; };
+		000000000000000000000023 = {isa = PBXBuildFile; fileRef = 000000000000000000000021; };
+		000000000000000000000027 = {isa = PBXBuildFile; fileRef = 000000000000000000000024; };
+		000000000000000000000028 = {isa = PBXBuildFile; fileRef = 000000000000000000000025; };
+		000000000000000000000029 = {isa = PBXBuildFile; fileRef = 000000000000000000000026; };
+		00000000000000000000002B = {isa = PBXBuildFile; fileRef = 00000000000000000000002A; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		000000000000000000000006 = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QuietReels.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		000000000000000000000007 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuietReelsApp.swift; sourceTree = "<group>"; };
+		000000000000000000000008 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryStore.swift; sourceTree = "<group>"; };
+		000000000000000000000009 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedReelsView.swift; sourceTree = "<group>"; };
+		00000000000000000000000A = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalVideoView.swift; sourceTree = "<group>"; };
+		00000000000000000000000B = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		000000000000000000000020 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineCacheStore.swift; sourceTree = "<group>"; };
+		000000000000000000000021 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineVideosView.swift; sourceTree = "<group>"; };
+		000000000000000000000024 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstagramWebSession.swift; sourceTree = "<group>"; };
+		000000000000000000000025 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecommendedOfflineStore.swift; sourceTree = "<group>"; };
+		000000000000000000000026 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecommendedOfflineView.swift; sourceTree = "<group>"; };
+		00000000000000000000002A = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheModeSettingsView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		000000000000000000000018 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		000000000000000000000003 = {isa = PBXGroup; children = (000000000000000000000005, 000000000000000000000004,); sourceTree = "<group>"; };
+		000000000000000000000004 = {isa = PBXGroup; children = (000000000000000000000006,); name = Products; sourceTree = "<group>"; };
+		000000000000000000000005 = {isa = PBXGroup; children = (000000000000000000000007, 000000000000000000000008, 000000000000000000000009, 00000000000000000000000A, 00000000000000000000000B, 000000000000000000000020, 000000000000000000000021, 000000000000000000000024, 000000000000000000000025, 000000000000000000000026, 00000000000000000000002A,); path = QuietReels; sourceTree = "<group>"; };
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		000000000000000000000002 = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 00000000000000000000001B;
+			buildPhases = (000000000000000000000017, 000000000000000000000018, 000000000000000000000019,);
+			buildRules = ();
+			dependencies = ();
+			name = QuietReels;
+			productName = QuietReels;
+			productReference = 000000000000000000000006;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		000000000000000000000001 = {
+			isa = PBXProject;
+			attributes = { BuildIndependentTargetsInParallel = 1; LastUpgradeCheck = 1500; TargetAttributes = { 000000000000000000000002 = { CreatedOnToolsVersion = 15.0; }; }; };
+			buildConfigurationList = 00000000000000000000001A;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (en, Base,);
+			mainGroup = 000000000000000000000003;
+			productRefGroup = 000000000000000000000004;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (000000000000000000000002,);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		000000000000000000000019 = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		000000000000000000000017 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (000000000000000000000012, 000000000000000000000013, 000000000000000000000014, 000000000000000000000015, 000000000000000000000016, 000000000000000000000022, 000000000000000000000023, 000000000000000000000027, 000000000000000000000028, 000000000000000000000029, 00000000000000000000002B,); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		00000000000000000000001C = {isa = XCBuildConfiguration; buildSettings = { CLANG_ENABLE_MODULES = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SDKROOT = iphoneos; SWIFT_VERSION = 5.0; }; name = Debug; };
+		00000000000000000000001D = {isa = XCBuildConfiguration; buildSettings = { CLANG_ENABLE_MODULES = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SDKROOT = iphoneos; SWIFT_VERSION = 5.0; }; name = Release; };
+		00000000000000000000001E = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Quiet Reels";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.example.QuietReels;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		00000000000000000000001F = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Quiet Reels";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.example.QuietReels;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		00000000000000000000001A = {isa = XCConfigurationList; buildConfigurations = (00000000000000000000001C, 00000000000000000000001D,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		00000000000000000000001B = {isa = XCConfigurationList; buildConfigurations = (00000000000000000000001E, 00000000000000000000001F,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+/* End XCConfigurationList section */
+	};
+	rootObject = 000000000000000000000001;
+}
