@@ -1,0 +1,74 @@
+name: Unsigned IPA
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "preview-*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-unsigned-ipa:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build unsigned iPhone app
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project QuietReels.xcodeproj \
+            -scheme QuietReels \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/QuietReelsDerivedData" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            build 2>&1 | tee "$RUNNER_TEMP/ipa-build.log"
+
+      - name: Package IPA
+        run: |
+          APP="$RUNNER_TEMP/QuietReelsDerivedData/Build/Products/Release-iphoneos/QuietReels.app"
+          test -d "$APP"
+          test -x "$APP/QuietReels"
+
+          PACKAGE_ROOT="$RUNNER_TEMP/QuietReelsPackage"
+          mkdir -p "$PACKAGE_ROOT/Payload"
+          cp -R "$APP" "$PACKAGE_ROOT/Payload/QuietReels.app"
+
+          cd "$PACKAGE_ROOT"
+          /usr/bin/ditto -c -k --sequesterRsrc --keepParent Payload \
+            "$GITHUB_WORKSPACE/QuietReels-unsigned.ipa"
+          cd "$GITHUB_WORKSPACE"
+          shasum -a 256 QuietReels-unsigned.ipa > QuietReels-unsigned.ipa.sha256
+
+      - name: Verify packaged application
+        run: |
+          plutil -extract CFBundleIdentifier raw \
+            "$RUNNER_TEMP/QuietReelsPackage/Payload/QuietReels.app/Info.plist"
+          plutil -extract CFBundleSupportedPlatforms.0 raw \
+            "$RUNNER_TEMP/QuietReelsPackage/Payload/QuietReels.app/Info.plist"
+          file "$RUNNER_TEMP/QuietReelsPackage/Payload/QuietReels.app/QuietReels"
+          unzip -t QuietReels-unsigned.ipa
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: QuietReels-unsigned-IPA
+          path: |
+            QuietReels-unsigned.ipa
+            QuietReels-unsigned.ipa.sha256
+          if-no-files-found: error
+
+      - name: Publish preview release
+        if: startsWith(github.ref, 'refs/tags/preview-')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            QuietReels-unsigned.ipa \
+            QuietReels-unsigned.ipa.sha256 \
+            --title "Quiet Reels unsigned IPA · $GITHUB_REF_NAME" \
+            --notes "Unsigned preview build of the independent Quiet Reels prototype. This is not a modified Instagram app. The IPA must be signed with an Apple development or distribution identity before installation on a normal iPhone."
