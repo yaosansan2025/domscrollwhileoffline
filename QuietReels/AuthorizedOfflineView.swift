@@ -3,31 +3,39 @@ import UniformTypeIdentifiers
 
 struct AuthorizedOfflineView: View {
     @EnvironmentObject private var offline: AuthorizedOfflineStore
+    var accountID: String? = nil
     @State private var importing = false
     @State private var managing = false
     @State private var confirmClear = false
 
+    private var account: OfflineAccount? { offline.accounts.first { $0.id == accountID } }
+    private var visibleReels: [OfflineReel] {
+        guard let accountID else { return offline.reels }
+        return offline.reels.filter { $0.accountID == accountID }
+    }
+
     var body: some View {
         NavigationStack {
             Group {
-                if offline.reels.isEmpty {
+                if visibleReels.isEmpty {
                     ContentUnavailableView {
-                        Label("Your offline feed is empty", systemImage: "play.rectangle")
+                        Label(account == nil ? "Your offline feed is empty" : "No videos for this account",
+                              systemImage: "play.rectangle")
                     } description: {
-                        Text("Import videos you have permission to keep, then swipe through them whenever you are offline.")
+                        Text("Import video files you have permission to keep. Adding an account name does not download its posts.")
                     } actions: {
                         Button("Import videos") { importing = true }
                             .buttonStyle(.borderedProminent)
                     }
                 } else {
-                    ReelFeedView(reels: offline.reels.map { reel in
+                    ReelFeedView(reels: visibleReels.map { reel in
                         PlayableReel(id: reel.id, videoURL: offline.fileURL(for: reel),
                                      creator: reel.creator, caption: reel.caption,
                                      likes: nil, comments: nil)
                     }, loops: true)
                 }
             }
-            .navigationTitle("Offline Feed")
+            .navigationTitle(account.map { "@\($0.username)" } ?? "Offline Feed")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
@@ -37,7 +45,7 @@ struct AuthorizedOfflineView: View {
                         Button("Manage saved videos", systemImage: "list.bullet") {
                             managing = true
                         }
-                        .disabled(offline.reels.isEmpty)
+                        .disabled(visibleReels.isEmpty)
                     } label: { Image(systemName: "ellipsis.circle") }
                 }
             }
@@ -53,7 +61,7 @@ struct AuthorizedOfflineView: View {
                 do {
                     let urls = try result.get()
                     Task {
-                        for url in urls { await offline.importFile(url) }
+                        for url in urls { await offline.importFile(url, accountID: accountID) }
                     }
                 } catch { offline.errorMessage = error.localizedDescription }
             }
@@ -61,11 +69,11 @@ struct AuthorizedOfflineView: View {
                 NavigationStack {
                     List {
                         Section {
-                            Text(ByteCountFormatter.string(fromByteCount: offline.totalBytes,
+                            Text(ByteCountFormatter.string(fromByteCount: visibleReels.reduce(0) { $0 + $1.byteCount },
                                                           countStyle: .file))
                         } header: { Text("Storage used") }
                         Section("Saved videos") {
-                            ForEach(offline.reels) { reel in
+                            ForEach(visibleReels) { reel in
                                 HStack {
                                     VStack(alignment: .leading) {
                                         Text(reel.creator).font(.headline)
@@ -93,12 +101,15 @@ struct AuthorizedOfflineView: View {
                         }
                         ToolbarItem(placement: .topBarTrailing) {
                             Button("Clear all", role: .destructive) { confirmClear = true }
-                                .disabled(offline.isSaving || offline.reels.isEmpty)
+                                .disabled(offline.isSaving || visibleReels.isEmpty)
                         }
                     }
                     .confirmationDialog("Delete all offline videos?", isPresented: $confirmClear) {
                         Button("Delete all", role: .destructive) {
-                            do { try offline.clearAll() }
+                            do {
+                                if accountID == nil { try offline.clearAll() }
+                                else { for reel in visibleReels { try offline.delete(reel) } }
+                            }
                             catch { offline.errorMessage = error.localizedDescription }
                         }
                     }

@@ -6,8 +6,13 @@ struct QuietReelsApp: App {
 
     var body: some Scene {
         WindowGroup {
-            AuthorizedOfflineView()
-                .environmentObject(offline)
+            TabView {
+                AuthorizedOfflineView()
+                    .tabItem { Label("Feed", systemImage: "play.rectangle") }
+                AccountSourcesView()
+                    .tabItem { Label("Accounts", systemImage: "person.2") }
+            }
+            .environmentObject(offline)
         }
     }
 }

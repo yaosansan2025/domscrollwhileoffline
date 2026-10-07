@@ -6,6 +6,8 @@ An independent iPhone app for swiping through a local library of videos. Import 
 
 Save authorized video files to the iPhone's Files app, open Offline Feed, then tap **Import videos**. Select one or several files. The app does not fetch Instagram's recommended feed. Meta's supported API does not expose a personal account's recommendations or permit arbitrary offline copies of other people's Reels. This app does not modify or wrap Instagram.
 
+The **Accounts** tab lets you add a creator username later. Tap the account to import video files into that account's offline collection. The main feed continues to show every imported video. Removing a username keeps its files in the main feed. A username is a local label; adding it does not authenticate, sync, or download posts.
+
 ## Build
 
 Requires Xcode 15 or newer and iOS 17 or newer. It has no third-party dependencies. To build without signing on a Mac:

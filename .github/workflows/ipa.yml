@@ -72,4 +72,4 @@ jobs:
             QuietReels-unsigned.ipa \
             QuietReels-unsigned.ipa.sha256 \
             --title "Offline Feed unsigned IPA · $GITHUB_REF_NAME" \
-            --notes "Unsigned preview build of the offline video feed. Import authorized video files; no Instagram account or auth token is needed. The IPA needs Apple signing before installation on a normal iPhone. See the repository README."
+            --notes "Unsigned preview build of the offline video feed. Add creator usernames as local collections and import authorized video files. Account names do not sync Instagram. The IPA needs Apple signing before installation on a normal iPhone. See the repository README."
