@@ -17,4 +17,4 @@ xcodebuild -project QuietReels.xcodeproj -scheme QuietReels \
   -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
 ```
 
-The GitHub Actions workflow builds an unsigned iPhone IPA for preview. An unsigned IPA needs Apple signing before it can be installed on a normal iPhone. The app makes no network requests and needs no Meta developer app or authentication server.
+The GitHub Actions workflow builds an unsigned iPhone IPA. Release 1.2.0 contains the account collections and uses app version 1.2.0. An unsigned IPA needs Apple signing before it can be installed on a normal iPhone. The app makes no network requests and needs no Meta developer app or authentication server.

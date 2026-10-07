@@ -5,7 +5,7 @@ on:
   pull_request:
   push:
     tags:
-      - "preview-*"
+      - "1.2.0"
 
 permissions:
   contents: write
@@ -41,9 +41,9 @@ jobs:
 
           cd "$PACKAGE_ROOT"
           /usr/bin/ditto -c -k --sequesterRsrc --keepParent Payload \
-            "$GITHUB_WORKSPACE/QuietReels-unsigned.ipa"
+            "$GITHUB_WORKSPACE/OfflineFeed-1.2.0-unsigned.ipa"
           cd "$GITHUB_WORKSPACE"
-          shasum -a 256 QuietReels-unsigned.ipa > QuietReels-unsigned.ipa.sha256
+          shasum -a 256 OfflineFeed-1.2.0-unsigned.ipa > OfflineFeed-1.2.0-unsigned.ipa.sha256
 
       - name: Verify packaged application
         run: |
@@ -51,25 +51,32 @@ jobs:
             "$RUNNER_TEMP/QuietReelsPackage/Payload/QuietReels.app/Info.plist"
           plutil -extract CFBundleSupportedPlatforms.0 raw \
             "$RUNNER_TEMP/QuietReelsPackage/Payload/QuietReels.app/Info.plist"
+          test "$(plutil -extract CFBundleShortVersionString raw "$RUNNER_TEMP/QuietReelsPackage/Payload/QuietReels.app/Info.plist")" = "1.2.0"
           file "$RUNNER_TEMP/QuietReelsPackage/Payload/QuietReels.app/QuietReels"
-          unzip -t QuietReels-unsigned.ipa
+          unzip -t OfflineFeed-1.2.0-unsigned.ipa
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
-          name: QuietReels-unsigned-IPA
+          name: OfflineFeed-1.2.0-unsigned-IPA
           path: |
-            QuietReels-unsigned.ipa
-            QuietReels-unsigned.ipa.sha256
+            OfflineFeed-1.2.0-unsigned.ipa
+            OfflineFeed-1.2.0-unsigned.ipa.sha256
           if-no-files-found: error
 
-      - name: Publish preview release
-        if: startsWith(github.ref, 'refs/tags/preview-')
+      - name: Publish release
+        if: github.ref == 'refs/tags/1.2.0'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "$GITHUB_REF_NAME" \
-            QuietReels-unsigned.ipa \
-            QuietReels-unsigned.ipa.sha256 \
-            --title "Offline Feed unsigned IPA · $GITHUB_REF_NAME" \
-            --notes "Unsigned preview build of the offline video feed. Add creator usernames as local collections and import authorized video files. Account names do not sync Instagram. The IPA needs Apple signing before installation on a normal iPhone. See the repository README."
+            OfflineFeed-1.2.0-unsigned.ipa \
+            OfflineFeed-1.2.0-unsigned.ipa.sha256 \
+            --title "1.2.0" \
+            --notes "Offline Feed 1.2.0 adds creator account collections for authorized local video files. A username does not sign in or download posts. This IPA is unsigned and needs Apple signing before installation on a normal iPhone."
+
+      - name: Remove superseded preview release
+        if: github.ref == 'refs/tags/1.2.0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --method DELETE "repos/$GITHUB_REPOSITORY/releases/405440540"
