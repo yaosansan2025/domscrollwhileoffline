@@ -71,5 +71,5 @@ jobs:
           gh release create "$GITHUB_REF_NAME" \
             QuietReels-unsigned.ipa \
             QuietReels-unsigned.ipa.sha256 \
-            --title "Quiet Reels unsigned IPA · $GITHUB_REF_NAME" \
-            --notes "Unsigned preview build of the independent Quiet Reels prototype. This is not a modified Instagram app. The IPA must be signed with an Apple development or distribution identity before installation on a normal iPhone."
+            --title "Reels Library unsigned IPA · $GITHUB_REF_NAME" \
+            --notes "Unsigned preview build of the native professional Instagram media client. The IPA needs Apple signing before installation on a normal iPhone. Instagram sign-in also requires a configured Meta app and HTTPS authentication service; see the repository README."
