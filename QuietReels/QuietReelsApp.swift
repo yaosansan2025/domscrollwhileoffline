@@ -2,54 +2,31 @@ import SwiftUI
 
 @main
 struct QuietReelsApp: App {
-    @StateObject private var library = LibraryStore()
-    @StateObject private var cache = OfflineCacheStore()
-    @StateObject private var recommended = RecommendedOfflineStore()
-    @StateObject private var instagramWeb = InstagramWebSession()
-    @StateObject private var navigation = AppNavigation()
+    @StateObject private var auth: InstagramAuth
+    @StateObject private var instagram: InstagramStore
+    @StateObject private var offline = AuthorizedOfflineStore()
+
+    init() {
+        let auth = InstagramAuth()
+        _auth = StateObject(wrappedValue: auth)
+        _instagram = StateObject(wrappedValue: InstagramStore(auth: auth))
+    }
 
     var body: some Scene {
         WindowGroup {
-            TabView(selection: $navigation.selectedTab) {
-                SharedReelsView()
-                    .tabItem { Label("Shared Reels", systemImage: "play.rectangle") }
-                    .tag(AppTab.shared)
-
-                RecommendedOfflineView()
-                    .tabItem { Label("Recommended", systemImage: "arrow.down.to.line") }
-                    .tag(AppTab.recommended)
-
-                OfflineVideosView()
-                    .tabItem { Label("Offline Videos", systemImage: "tray.full") }
-                    .tag(AppTab.offline)
-
-                ProfileView()
-                    .tabItem { Label("My Profile", systemImage: "person.crop.circle") }
-                    .tag(AppTab.profile)
-
-                CacheModeSettingsView()
+            TabView {
+                OwnReelsView()
+                    .tabItem { Label("My Videos", systemImage: "play.rectangle") }
+                AuthorizedOfflineView()
+                    .tabItem { Label("Offline", systemImage: "arrow.down.circle") }
+                ProfessionalProfileView()
+                    .tabItem { Label("Profile", systemImage: "person.crop.circle") }
+                ProfessionalSettingsView()
                     .tabItem { Label("Settings", systemImage: "gearshape") }
-                    .tag(AppTab.settings)
             }
-            .environmentObject(library)
-            .environmentObject(cache)
-            .environmentObject(recommended)
-            .environmentObject(instagramWeb)
-            .environmentObject(navigation)
+            .environmentObject(auth)
+            .environmentObject(instagram)
+            .environmentObject(offline)
         }
     }
-}
-
-enum AppTab: Hashable {
-    case recommended
-    case shared
-    case offline
-    case profile
-    case settings
-}
-
-@MainActor
-final class AppNavigation: ObservableObject {
-    @Published var selectedTab: AppTab = UserDefaults.standard.bool(forKey: "recommendedCacheMode")
-        ? .recommended : .shared
 }

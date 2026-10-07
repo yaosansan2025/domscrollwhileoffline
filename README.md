@@ -1,76 +1,49 @@
-# Quiet Reels
+# Reels Library
 
-A SwiftUI iPhone prototype with five tabs: **Shared Reels**, **Recommended** (experimental personalized batch cache), **Offline Videos**, **My Profile**, and **Settings**. Offline playback uses only saved local files. It never fetches another recommendation while you watch a cached batch.
+An independent native iOS client for a **Business or Creator account's own Instagram media**, plus a local video library. It uses Meta's official Instagram API with Instagram Login. It does not modify Instagram, access a personal account's recommended feed, or use a WebView for browsing videos.
 
-## Cache mode
+## What the app does
 
-In **Settings**, the **Recommended Reels Auto Cache** switch controls which source can start new caching. It is **OFF** by default: open an item in Shared Reels to use **Cache Offline**. Turn it **ON** to use **Download Offline Reels** or **Refresh Offline Videos** in Recommended. The switch is saved across launches. It does not delete files, change either downloader's storage format, or restrict playback. **Offline Videos** shows both caches with **Shared** and **Recommended** labels and their combined size. Its **Manage** menu can clear either source independently or clear both, each with confirmation. The Recommended page also retains its own cache list and controls.
+- **My Videos:** Pages through your professional account's media and plays available videos in a native vertical feed. The currently visible video plays and loops; videos outside the page pause. Creator, caption, and counts appear when the API returns them. Paging ends when your own media ends.
+- **Profile:** Displays your professional profile and posts returned by the API.
+- **Offline:** Imports video files you are authorized to keep, or saves an accessible video from your own account after a rights confirmation. Only validated local files appear in the offline feed. They remain playable without a network connection.
+- **Settings:** Starts Meta's browser-based consent flow, stores the resulting token in the iOS Keychain, refreshes an expiring long-lived token, and logs out. Videos and profile use native UI after sign-in.
 
-## Instagram API and Web limitations
+The Instagram Login API may not identify which video posts are Reels, so My Videos includes all playable videos from your account. The Instagram API does **not** expose your personalized recommended Reels, its infinite ranking, personal DMs, or arbitrary recommended media downloads. This app makes no claim to provide them. Audio labels are omitted because the selected official media fields do not supply a reliable audio title. Video playback and offline saving may fail if a returned media URL expires, is inaccessible, or does not resolve to a playable file. Licensed audio may also restrict local copies. Imported files and your own saved videos are separate from Instagram's official app cache.
 
-Meta's [Instagram API with Instagram Login](https://developers.facebook.com/docs/instagram-platform/instagram-api-with-instagram-login/) targets professional (Business/Creator) accounts. It does **not** expose a personal user's recommended Reels feed, the official app's personalized ranking, or arbitrary recommended Reels' downloadable media URLs. The [messaging API](https://developers.facebook.com/docs/instagram-platform/instagram-api-with-instagram-login/messaging-api/) also does not provide general access to a personal DM or group-chat inbox. Own-account professional media endpoints are not a recommendation feed. No official API grants this app a general right to download and retain recommended Reels long term.
+## Required Meta setup
 
-The Meta documentation site and Instagram Web returned HTTP 403 from this workspace on October 6, 2026. The current live API behavior and HTML structure **could not be tested here**; recheck the official docs before treating any integration claim as current. This project does not use a private Instagram endpoint or ask for an Instagram API token.
+1. Create a Meta developer app with **Instagram API with Instagram Login** and connect a Business or Creator Instagram account. Request `instagram_business_basic`. For use outside app roles/test accounts, complete any required Meta App Review.
+2. Set a public HTTPS redirect URI in the Meta app's Instagram Business Login settings, for example `https://auth.example.com/auth/callback`.
+3. Deploy the included [auth-server/server.mjs](auth-server/server.mjs) behind HTTPS. It needs Node.js 18 or newer and these environment variables:
 
-Instagram Web video URLs may use cookies, signed parameters, request headers, expiring CDN links, `blob:`/MediaSource playback, DRM, or other access controls. A Reel page URL is not a video file. A failed or protected URL is not marked as cached. This prototype only attempts direct HTTPS video sources rendered by the Web page and validates the downloaded file before showing it offline. Rights and Instagram's terms may also restrict saving particular content; use only content you are allowed to store.
+   | Variable | Value |
+   | --- | --- |
+   | `IG_CLIENT_ID` | Instagram App ID from Meta's Instagram product settings |
+   | `IG_CLIENT_SECRET` | Instagram App Secret; keep on the server |
+   | `IG_REDIRECT_URI` | Exact HTTPS URI registered in Meta, including path |
+   | `HOST`, `PORT` | Optional bind address and port; defaults to `127.0.0.1:8787` |
 
-## Experimental one-tap recommended cache
+   The service has `/auth/start`, the redirect callback, and `/auth/redeem`. It keeps short-lived OAuth state and one-time tickets in memory. A restart during sign-in cancels that attempt. Use one instance or sticky routing for this sample service. Do not expose its HTTP listener directly to the internet; terminate HTTPS at a trusted reverse proxy. Keep the app secret in deployment secrets, not source control.
+4. Open the Xcode project, set a unique bundle identifier and signing team, and build for an iPhone. In **Settings**, enter the service's HTTPS origin, such as `https://auth.example.com`, then tap **Sign in with Instagram**. Meta's consent page appears in the system authentication session and returns to the app. The service exchanges the code and sends a one-time ticket to the app; the access token is returned over HTTPS and saved in Keychain. No password, cookie, client secret, or access token is hard-coded in the app.
 
-1. Turn on **Recommended Reels Auto Cache** in **Settings**, then open **Recommended > Open Instagram Web Session** and sign in there. This WebKit session is separate from the Instagram app's login; iOS cannot copy the other app's session. Cookies remain in WebKit storage and are passed only in memory to an ephemeral `URLSession` for video requests. They are not logged or written into the cache index.
-2. Choose **10**, **20**, or **50**, then tap **Download Offline Reels** once. The app loads the Instagram Web Reels page, scans rendered Reel links and video elements, scrolls within a bounded number of rounds, and attempts to download the first discovered direct HTTPS media sources. It does not ask you to select each video. The browser DOM and its ordering are undocumented, so this is **not guaranteed to match the Instagram app's ranking**, return the selected count, or work after an Instagram update. If it sees only `blob:` streams or no downloadable media URLs, it reports that limitation rather than inventing results.
-3. Progress shows `X / N videos downloaded`, failures, and already cached items. **Pause** cancels the current request and preserves completed files and remaining candidates in memory; **Resume** continues during the same app session. **Cancel** stops the batch and keeps completed videos. Relaunching the app preserves completed videos but requires starting a new batch for unfinished work.
-4. **Refresh Offline Videos** discovers current Web recommendations, downloads new playable files, then removes some oldest pre-existing recommended cache entries. It leaves old entries in place if no new download succeeds. The Web page may yield too few fresh items, which is reported explicitly.
+The service uses the custom URL scheme `quietreels` to return the ticket. If the deployment changes that scheme, update the service, `Info.plist`, and `InstagramAuth.swift` together. A production deployment should use a claimed Universal Link to strengthen callback ownership.
 
-Downloaded MP4 files, thumbnails when extraction succeeds, and an atomic JSON index live under Application Support in `QuietReels/RecommendedVideos`. The index records Reel ID, canonical Reel URL, cache time, relative file paths, and byte size. The **Recommended** and **Offline Videos** lists show saved recommended videos, and the local-only player has native pause/scrub controls, replay, and previous/next buttons restricted to the already saved list. No network recommendation request happens in the player.
+## Offline behavior
 
-## Existing shared-message workflow
+Open **Offline > Import from Files** for a local `.mp4`, `.mov`, or `.m4v`. To save one of your own Instagram videos, swipe to it in **My Videos**, open the menu, and choose **Save current video offline**. Confirm only when you have the rights to store that video, including its audio. The app accepts a successful direct video response, verifies it is nonempty and playable, and writes a local index. Duplicate API media IDs are skipped. Failed downloads do not enter the feed. The feed swipes through saved files, autoplays, and loops each video; it stops at the end of the library.
 
-**Shared Reels** remains a separate manual workflow. Choose a Reel yourself in Instagram DM, including a group chat if applicable, and add its permalink plus a video file you are allowed to save, or a separate authorized direct video URL. Sender and chat names are entered manually. The app cannot read personal DMs or verify that the Reel was shared by a friend. A direct video URL may expire or require authorization. With the cache mode switch OFF, opening a Shared Reels item offers **Cache Offline**, which stores a separate copy in `QuietReels/OfflineVideos` and lists it under **Offline Videos**. That cache retains per-item deletion. It is not the source for the one-tap recommended batch.
+The prior experimental Instagram Web downloader is removed from the app. Existing files created by that prototype are left on device under its old Application Support directories and are not displayed by the new library. This avoids silently treating unverified Web downloads as authorized content.
 
-**My Profile** displays locally imported content, not a synchronized Instagram profile.
+## Build and verification
 
-## Verification still needed on an iPhone
-
-The recommended Web discovery and download flow could not be exercised in this Linux workspace. On a device, sign in through the Web Session, request a small batch, confirm the actual count and error messages, force quit and reopen, enable Airplane Mode, and verify local playback and previous/next navigation. Also test Pause/Resume/Cancel, Refresh, and Clear All. A successful Xcode build alone will not prove the Instagram Web prototype works, because Instagram can change the rendered page and media access at any time.
-
-## GitHub Actions
-
-Three workflows run on pushes to `main`, pull requests, or manually from the Actions tab:
-
-- **Swift** parses all app and test Swift files and type-checks `LibraryStore.swift`. This repository is an Xcode app without a `Package.swift`, so the standard Swift Package template would fail here.
-- **Xcode - Build and Analyze** builds and analyzes the iOS app for a generic iPhone simulator without code signing.
-- **iOS** selects an available iPhone simulator and runs the `QuietReelsTests` XCTest target through `xcodebuild test`. The tests verify that the manual Shared Reels entry points accept only a chosen Reel URL and an HTTPS direct video file URL, rejecting discovery pages and unrelated hosts.
-
-All three use GitHub-hosted macOS runners. The workflows do not require Apple signing credentials. They cannot verify the Instagram Web session, recommendation ranking, or offline playback on a real iPhone.
-
-## Build and export on a Mac
-
-To open the app in iPhone Simulator automatically, run this from the repository directory on your Mac:
-
-```sh
-bash scripts/run-ios-simulator.sh
-```
-
-The script chooses an available iPhone with iOS 17 or newer, opens Simulator, builds the app without signing, installs it, and launches it. Xcode and an iOS simulator runtime must be installed. You can optionally pass a specific simulator UDID as the first argument. The cloud workspace and GitHub Actions runners cannot display an interactive simulator on your Mac.
-
-Requirements: Xcode 15 or newer with the iOS 17 SDK. No third-party packages are needed. Open `QuietReels.xcodeproj`, choose an iPhone simulator or device, and run the `QuietReels` scheme. The default bundle identifier is `org.example.QuietReels`; use your own unique identifier for device installation. To check the build without signing:
+Requires Xcode 15 or newer and iOS 17 or newer. The project has no third-party dependencies. To build without signing on a Mac:
 
 ```sh
 xcodebuild -project QuietReels.xcodeproj -scheme QuietReels \
   -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
 ```
 
-For an installable `.ipa`, you need a Mac with Xcode, an Apple Developer team, an appropriate signing certificate, a provisioning profile for the chosen distribution method, and a registered device for development or ad hoc distribution. Set the target's Team and bundle identifier in Xcode, then archive and use **Product > Archive > Distribute App**. For command-line export:
+Run the `QuietReelsTests` target to check the API media model. The Linux workspace cannot compile or launch the iOS app, and no Meta credentials or signed-in device are available here. On an iPhone, test the full OAuth redirect, profile and media fields, paging, video playback, authorized download, Airplane Mode playback, token refresh, and logout. The Node service can be syntax-checked with `node --check auth-server/server.mjs`.
 
-```sh
-xcodebuild -project QuietReels.xcodeproj -scheme QuietReels \
-  -configuration Release -destination 'generic/platform=iOS' \
-  -archivePath build/QuietReels.xcarchive archive
-
-cp ExportOptions.example.plist ExportOptions.plist
-# Edit ExportOptions.plist: replace YOUR_TEAM_ID and choose the right export method.
-xcodebuild -exportArchive -archivePath build/QuietReels.xcarchive \
-  -exportPath build/export -exportOptionsPlist ExportOptions.plist
-```
-
-The exported IPA will be in `build/export/` after signing succeeds. `ExportOptions.plist` and build outputs are ignored by Git. This Linux workspace has no Xcode, iOS SDK, or Apple signing credentials, so it cannot compile the iOS target or generate a signed `.ipa` here.
+Official scope reference: [Meta's Instagram API with Instagram Login collection](https://www.postman.com/meta/instagram/folder/1z5vxzu/instagram-api-with-instagram-login). The exact fields and access permissions should be checked in the Meta app dashboard for the configured API version and account.
