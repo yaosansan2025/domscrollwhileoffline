@@ -7,7 +7,7 @@ struct ProfessionalSettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Instagram professional account") {
+                Section {
                     if auth.isSignedIn {
                         Text(instagram.profile.map { "Connected as @\($0.username)" } ?? "Connected")
                         Button("Log out", role: .destructive) {
@@ -23,14 +23,18 @@ struct ProfessionalSettingsView: View {
                     if let error = auth.errorMessage {
                         Text(error).foregroundStyle(.red)
                     }
+                } header: {
+                    Text("Instagram professional account")
                 } footer: {
                     Text("Meta's official API supports Business and Creator accounts. This app shows your own media; it has no personalized recommendation feed.")
                 }
-                Section("Authentication service") {
+                Section {
                     TextField("https://your-service.example", text: $auth.serviceURLString)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .keyboardType(.URL)
+                } header: {
+                    Text("Authentication service")
                 } footer: {
                     Text("Configure an HTTPS token-exchange service before signing in. The Instagram app secret stays on that service; the access token is stored in this device's Keychain.")
                 }
