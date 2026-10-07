@@ -12,11 +12,11 @@ struct AuthorizedOfflineView: View {
             Group {
                 if offline.reels.isEmpty {
                     ContentUnavailableView {
-                        Label("No offline videos", systemImage: "arrow.down.circle")
+                        Label("Your offline feed is empty", systemImage: "play.rectangle")
                     } description: {
-                        Text("Import video files you are authorized to keep, or save one of your own Instagram videos from My Videos.")
+                        Text("Import videos you have permission to keep, then swipe through them whenever you are offline.")
                     } actions: {
-                        Button("Import from Files") { importing = true }
+                        Button("Import videos") { importing = true }
                             .buttonStyle(.borderedProminent)
                     }
                 } else {
@@ -24,14 +24,14 @@ struct AuthorizedOfflineView: View {
                         PlayableReel(id: reel.id, videoURL: offline.fileURL(for: reel),
                                      creator: reel.creator, caption: reel.caption,
                                      likes: nil, comments: nil)
-                    })
+                    }, loops: true)
                 }
             }
-            .navigationTitle("Offline")
+            .navigationTitle("Offline Feed")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
-                        Button("Import from Files", systemImage: "square.and.arrow.down") {
+                        Button("Import videos", systemImage: "square.and.arrow.down") {
                             importing = true
                         }
                         Button("Manage saved videos", systemImage: "list.bullet") {
@@ -48,10 +48,13 @@ struct AuthorizedOfflineView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
             }
-            .fileImporter(isPresented: $importing, allowedContentTypes: [.movie]) { result in
+            .fileImporter(isPresented: $importing, allowedContentTypes: [.movie],
+                          allowsMultipleSelection: true) { result in
                 do {
-                    let url = try result.get()
-                    Task { await offline.importFile(url) }
+                    let urls = try result.get()
+                    Task {
+                        for url in urls { await offline.importFile(url) }
+                    }
                 } catch { offline.errorMessage = error.localizedDescription }
             }
             .sheet(isPresented: $managing) {

@@ -13,14 +13,22 @@ struct PlayableReel: Identifiable {
 
 struct ReelFeedView: View {
     let reels: [PlayableReel]
+    var loops = false
     var reached: ((String) -> Void)? = nil
     @State private var visibleID: String?
+
+    private var pages: [PlayableReel] {
+        guard loops, reels.count > 1, let first = reels.first else { return reels }
+        return reels + [PlayableReel(id: "\(first.id)-loop", videoURL: first.videoURL,
+                                     creator: first.creator, caption: first.caption,
+                                     likes: first.likes, comments: first.comments)]
+    }
 
     var body: some View {
         GeometryReader { geometry in
             ScrollView(.vertical) {
                 LazyVStack(spacing: 0) {
-                    ForEach(reels) { reel in
+                    ForEach(pages) { reel in
                         ReelPageView(reel: reel, active: visibleID == reel.id,
                                      preload: nextID(after: visibleID) == reel.id)
                             .frame(width: geometry.size.width, height: geometry.size.height)
@@ -38,14 +46,17 @@ struct ReelFeedView: View {
             if let visibleID, !ids.contains(visibleID) { self.visibleID = ids.first }
         }
         .onChange(of: visibleID) { _, value in
-            if let value { reached?(value) }
+            if loops, let first = reels.first, value == "\(first.id)-loop" {
+                withTransaction(Transaction(animation: nil)) { visibleID = first.id }
+            } else if let value { reached?(value) }
         }
     }
 
     private func nextID(after id: String?) -> String? {
-        guard let id, let index = reels.firstIndex(where: { $0.id == id }),
-              index + 1 < reels.count else { return nil }
-        return reels[index + 1].id
+        let available = pages
+        guard let id, let index = available.firstIndex(where: { $0.id == id }),
+              index + 1 < available.count else { return nil }
+        return available[index + 1].id
     }
 }
 
